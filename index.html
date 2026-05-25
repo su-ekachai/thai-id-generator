@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Educational Thai national ID generator — demonstrates the 13-digit checksum algorithm." />
+    <meta name="robots" content="noindex" />
+    <title>Thai ID Generator</title>
+    <link rel="icon" href="icons/favicon.ico" sizes="any" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon-180x180.png" />
+    <meta name="theme-color" content="#a51931" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0c0a09" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Thai ID" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    />
+    <script src="theme-init.js"></script>
+    <link
+      rel="preload"
+      href="fonts/noto-sans-thai-looped-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body class="min-h-dvh bg-app-bg text-app">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-[max(env(safe-area-inset-top),0.5rem)] focus:left-[max(env(safe-area-inset-left),0.5rem)] focus:z-50 focus:rounded-md focus:bg-app-surface focus:px-3 focus:py-2 focus:text-sm focus:shadow-md"
+    >
+      Skip to content
+    </a>
+
+    <div class="mx-auto flex min-h-dvh max-w-2xl flex-col px-4 py-6 sm:px-6 sm:py-10">
+      <!-- Header -->
+      <header class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <svg viewBox="0 0 24 24" class="h-6 w-6 shrink-0 text-app-accent" aria-hidden="true">
+            <rect width="24" height="24" rx="6" fill="currentColor" />
+            <text x="12" y="16.5" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">13</text>
+          </svg>
+          <h1 class="text-lg font-semibold tracking-tight sm:text-2xl" data-i18n="app.title">Thai National ID Generator</h1>
+        </div>
+        <div class="flex items-center gap-2">
+          <!-- Language toggle -->
+          <div
+            class="inline-flex overflow-hidden rounded-full border border-app-border bg-app-surface text-xs font-semibold"
+            role="group"
+            aria-label="Language"
+            data-i18n-aria="lang.label"
+          >
+            <button
+              id="lang-en"
+              type="button"
+              class="inline-flex min-h-11 min-w-11 items-center justify-center px-3.5 cursor-pointer transition-colors hover:bg-app-surface-2 aria-pressed:bg-app-accent aria-pressed:text-white"
+              aria-pressed="true"
+            >
+              EN
+            </button>
+            <button
+              id="lang-th"
+              type="button"
+              class="inline-flex min-h-11 min-w-11 items-center justify-center px-3.5 cursor-pointer transition-colors hover:bg-app-surface-2 aria-pressed:bg-app-accent aria-pressed:text-white"
+              aria-pressed="false"
+            >
+              TH
+            </button>
+          </div>
+          <!-- Theme toggle -->
+          <button
+            id="theme-toggle"
+            type="button"
+            class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-app-border bg-app-surface cursor-pointer transition-colors hover:bg-app-surface-2"
+            data-i18n-aria="theme.toggle.dark"
+            aria-label="Switch to dark mode"
+          >
+            <!-- Sun icon (shown in dark mode) -->
+            <svg
+              id="icon-sun"
+              class="hidden h-5 w-5 dark:block"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+            </svg>
+            <!-- Moon icon (shown in light mode) -->
+            <svg
+              id="icon-moon"
+              class="block h-5 w-5 dark:hidden"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <p class="mt-2 text-sm text-muted" data-i18n="app.subtitle">
+        Educational demonstration of the 13-digit checksum algorithm.
+      </p>
+
+      <main id="main" class="mt-8 flex flex-1 flex-col gap-6">
+        <!-- ID display card -->
+        <section
+          aria-label="Generated Thai national ID"
+          class="rounded-2xl border border-app-border bg-app-surface p-6 sm:p-8 shadow-sm"
+        >
+          <div
+            id="id-display"
+            class="select-all font-mono font-bold tabular-nums text-app"
+            aria-live="polite"
+          >
+            <span class="text-muted font-normal text-xl sm:text-2xl" data-i18n="id.placeholder">
+              Press Generate to produce an ID.
+            </span>
+          </div>
+          <div class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-app-accent-soft px-2 py-0.5 text-xs font-semibold text-app-accent-strong">
+            <span aria-hidden="true">●</span>
+            <span>DEMO</span>
+          </div>
+
+          <div class="mt-6 flex flex-col gap-2 sm:flex-row">
+            <button
+              id="btn-generate"
+              type="button"
+              class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-sm font-semibold text-white cursor-pointer transition-[colors,transform] duration-200 hover:bg-app-accent-strong active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              <svg
+                class="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 12a9 9 0 1 1-3-6.7" />
+                <path d="M21 3v6h-6" />
+              </svg>
+              <span data-i18n="id.generate">Generate</span>
+            </button>
+            <button
+              id="btn-copy"
+              type="button"
+              disabled
+              class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-app-border bg-app-surface px-4 py-2.5 text-sm font-semibold text-app cursor-pointer transition-[colors,transform] duration-200 hover:bg-app-surface-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
+            >
+              <svg
+                class="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              <span id="btn-copy-label" data-i18n="id.copy">Copy</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Disclaimer — placed directly under the ID card so the
+             educational scope is visible without expanding any panel. -->
+        <section
+          class="rounded-2xl border border-app-accent/30 bg-app-accent-soft p-5 sm:p-6"
+          role="note"
+        >
+          <h2 class="flex items-center gap-2 text-sm font-semibold text-app-accent-strong">
+            <svg
+              class="h-4 w-4 shrink-0"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            <span data-i18n="disclaimer.heading">Educational use only</span>
+          </h2>
+          <p class="mt-2 text-sm leading-relaxed text-app" data-i18n="disclaimer.body">
+            The numbers produced by this tool satisfy the Thai national ID checksum for the sole purpose of
+            demonstrating the algorithm. The numbers are not real identities and must not be used to
+            impersonate any person, complete real forms, or commit fraud.
+          </p>
+        </section>
+
+        <!-- Digit-meaning view -->
+        <section class="rounded-2xl border border-app-border bg-app-surface shadow-sm">
+          <details id="digits-details" class="group">
+            <summary
+              class="flex cursor-pointer items-center justify-between gap-2 rounded-2xl px-6 py-4 select-none hover:bg-app-surface-2 group-open:rounded-b-none"
+            >
+              <span class="text-sm font-semibold" data-i18n="digits.heading">What each digit represents</span>
+              <svg
+                class="h-4 w-4 text-muted transition-transform group-open:rotate-180"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </summary>
+            <div id="digits-body" class="border-t border-app-border px-4 sm:px-6 py-5"></div>
+          </details>
+        </section>
+
+        <!-- Algorithm view -->
+        <section class="rounded-2xl border border-app-border bg-app-surface shadow-sm">
+          <details id="algo-details" class="group">
+            <summary
+              class="flex cursor-pointer items-center justify-between gap-2 rounded-2xl px-6 py-4 select-none hover:bg-app-surface-2 group-open:rounded-b-none"
+            >
+              <span class="text-sm font-semibold" data-i18n="algo.heading">How the algorithm works</span>
+              <svg
+                class="h-4 w-4 text-muted transition-transform group-open:rotate-180"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </summary>
+            <div id="algo-body" class="border-t border-app-border px-6 py-5"></div>
+          </details>
+        </section>
+      </main>
+
+      <footer class="mt-10 pt-6 text-center text-xs text-muted">
+        <a
+          href="https://github.com/su-ekachai/thai-id-generator"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="underline-offset-4 hover:text-app hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
+          data-i18n="footer.source"
+        >Source on GitHub</a>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

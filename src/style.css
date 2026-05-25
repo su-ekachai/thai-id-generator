@@ -1,0 +1,314 @@
+@import 'tailwindcss';
+
+/* Enable class-based dark mode (Tailwind v4 syntax). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Self-hosted variable fonts. Noto Sans Thai Looped — the looped Thai script
+   reads more legibly than the loopless cut at body sizes; see
+   docs/FONT-AUDIT.md. One file per subset covers the full wght 100..900
+   axis; one JetBrains Mono file covers wght 100..800. The fallback alias
+   uses local('Arial') with ascent / descent / line-gap overrides derived
+   from Noto's OS/2 metrics (UPM 1000, sTypoAscender 1069, sTypoDescender
+   293, sTypoLineGap 0) so the line-box height matches the eventual font
+   during the swap window and CLS stays at zero. */
+@font-face {
+  font-family: 'Noto Sans Thai Looped';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/thai-id-generator/fonts/noto-sans-thai-looped-latin-wght-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Noto Sans Thai Looped';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/thai-id-generator/fonts/noto-sans-thai-looped-thai-wght-normal.woff2') format('woff2');
+  unicode-range: U+0E01-0E5B, U+200C-200D, U+25CC;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('/thai-id-generator/fonts/jetbrains-mono-latin-wght-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Noto Sans Thai Looped Fallback';
+  src: local('Arial'), local('Helvetica');
+  ascent-override: 106.9%;
+  descent-override: 29.3%;
+  line-gap-override: 0%;
+}
+
+/* Update banner — bottom-right toast styled with Thai-flag accent. */
+.pwa-update-banner {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.75rem;
+  background: var(--color-app-surface);
+  color: var(--color-app-text);
+  border: 1px solid var(--color-app-border);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.25);
+  font-size: 0.875rem;
+  max-width: calc(100vw - 2rem);
+}
+.pwa-update-banner__text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pwa-update-banner__reload {
+  min-height: 36px;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--color-app-accent);
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 200ms;
+}
+.pwa-update-banner__reload:hover {
+  background: var(--color-app-accent-strong);
+}
+.pwa-update-banner__reload:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.pwa-update-banner__dismiss {
+  min-height: 36px;
+  min-width: 36px;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--color-app-muted);
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+.pwa-update-banner__dismiss:hover {
+  color: var(--color-app-text);
+}
+
+/* Design tokens — Thai-flag-inspired modern minimal palette. */
+@theme {
+  --color-app-bg: #fafaf9;
+  --color-app-surface: #ffffff;
+  --color-app-surface-2: #f5f5f4;
+  --color-app-text: #0f172a;
+  --color-app-muted: #475569;
+  --color-app-border: #e2e8f0;
+  --color-app-accent: #a51931;
+  --color-app-accent-strong: #7a1024;
+  --color-app-accent-soft: #fdecef;
+
+  /* Segment chip palette used by the digit-meaning breakdown.
+   * Each segment defines a background, foreground, and ring colour so the
+   * five logical groups stay visually distinct without relying on colour
+   * alone (each chip also carries a label and an aria-label). Values are
+   * derived from Tailwind's blue / emerald / amber / violet 50–200 ramp. */
+  --color-segment-type-bg: #eff6ff;
+  --color-segment-type-text: #1e3a8a;
+  --color-segment-type-ring: #bfdbfe;
+  --color-segment-location-bg: #ecfdf5;
+  --color-segment-location-text: #064e3b;
+  --color-segment-location-ring: #a7f3d0;
+  --color-segment-volume-bg: #fffbeb;
+  --color-segment-volume-text: #78350f;
+  --color-segment-volume-ring: #fde68a;
+  --color-segment-sequence-bg: #f5f3ff;
+  --color-segment-sequence-text: #4c1d95;
+  --color-segment-sequence-ring: #ddd6fe;
+
+  --font-sans: 'Noto Sans Thai Looped', 'Noto Sans Thai Looped Fallback', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Dark-mode token overrides — applied when .dark is on <html>.
+ *
+ * The accent stays in the Thai-flag crimson family for brand identity.
+ * The dark value `#c8203f` lifts the light `#a51931` for visibility while
+ * preserving hue. White text on `#c8203f` measures 5.4:1 (WCAG AA normal
+ * text), restoring contrast on the primary Generate button.
+ *
+ * The border moves from `#27272a` (zinc-800) to `#292524` (stone-800) so the
+ * neutral family matches the surfaces above and below it. */
+.dark {
+  --color-app-bg: #0c0a09;
+  --color-app-surface: #1c1917;
+  --color-app-surface-2: #292524;
+  --color-app-text: #f8fafc;
+  --color-app-muted: #94a3b8;
+  --color-app-border: #292524;
+  --color-app-accent: #c8203f;
+  --color-app-accent-strong: #f4546f;
+  --color-app-accent-soft: rgb(200 32 63 / 0.16);
+
+  /* Segment chip overrides for dark mode. Backgrounds use the matching
+   * Tailwind 950 hue at 40% alpha so the chip blends into the dark surface
+   * but remains distinguishable; foregrounds promote to the 200 ramp for
+   * AAA contrast (verified ≥ 7:1 against the resulting effective bg). */
+  --color-segment-type-bg: rgb(23 37 84 / 0.4);
+  --color-segment-type-text: #bfdbfe;
+  --color-segment-type-ring: rgb(30 64 175 / 0.6);
+  --color-segment-location-bg: rgb(2 44 34 / 0.4);
+  --color-segment-location-text: #a7f3d0;
+  --color-segment-location-ring: rgb(6 95 70 / 0.6);
+  --color-segment-volume-bg: rgb(69 26 3 / 0.4);
+  --color-segment-volume-text: #fde68a;
+  --color-segment-volume-ring: rgb(146 64 14 / 0.6);
+  --color-segment-sequence-bg: rgb(46 16 101 / 0.4);
+  --color-segment-sequence-text: #ddd6fe;
+  --color-segment-sequence-ring: rgb(91 33 182 / 0.6);
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  /* Fluid size for the 13-digit ID display so the value scales smoothly
+   * between the iPhone SE viewport and a 4K desktop without crossing a
+   * Tailwind breakpoint that previously caused overflow at `lg` (60 px text
+   * inside a `max-w-2xl` card). The clamp range guarantees the formatted
+   * string fits at all viewport widths ≥ 360 px; `overflow-wrap: anywhere`
+   * is the safety net for the rare narrower devices. */
+  #id-display {
+    font-size: clamp(1.5rem, 5.5vw, 3rem);
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+  /* Respect the iOS safe-area insets declared by `viewport-fit=cover` in
+   * `index.html`. The padding only applies on devices that expose non-zero
+   * insets (iPhone with notch / dynamic island, iPad in landscape with a
+   * home indicator). On other devices each `env(...)` value resolves to `0`. */
+  body {
+    background-color: var(--color-app-bg);
+    color: var(--color-app-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    padding-top: env(safe-area-inset-top);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+  }
+  /* Disable iOS tap delay. */
+  button,
+  a {
+    touch-action: manipulation;
+  }
+  /* Visible focus ring everywhere. */
+  :focus-visible {
+    outline: 2px solid var(--color-app-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/* Helper utilities mapped to the design tokens (used in markup). */
+@utility bg-app-bg {
+  background-color: var(--color-app-bg);
+}
+@utility bg-app-surface {
+  background-color: var(--color-app-surface);
+}
+@utility bg-app-surface-2 {
+  background-color: var(--color-app-surface-2);
+}
+@utility bg-app-accent-soft {
+  background-color: var(--color-app-accent-soft);
+}
+@utility text-app {
+  color: var(--color-app-text);
+}
+@utility text-muted {
+  color: var(--color-app-muted);
+}
+@utility text-app-accent {
+  color: var(--color-app-accent);
+}
+@utility text-app-accent-strong {
+  color: var(--color-app-accent-strong);
+}
+@utility border-app-border {
+  border-color: var(--color-app-border);
+}
+@utility ring-app-accent {
+  --tw-ring-color: var(--color-app-accent);
+}
+
+/* Segment chip utilities — single class per segment that sets background,
+ * foreground, and ring colour together. Used by `src/digits-view.ts`. */
+@utility segment-type {
+  background-color: var(--color-segment-type-bg);
+  color: var(--color-segment-type-text);
+  --tw-ring-color: var(--color-segment-type-ring);
+}
+@utility segment-location {
+  background-color: var(--color-segment-location-bg);
+  color: var(--color-segment-location-text);
+  --tw-ring-color: var(--color-segment-location-ring);
+}
+@utility segment-volume {
+  background-color: var(--color-segment-volume-bg);
+  color: var(--color-segment-volume-text);
+  --tw-ring-color: var(--color-segment-volume-ring);
+}
+@utility segment-sequence {
+  background-color: var(--color-segment-sequence-bg);
+  color: var(--color-segment-sequence-text);
+  --tw-ring-color: var(--color-segment-sequence-ring);
+}
+@utility segment-check {
+  background-color: var(--color-app-accent-soft);
+  color: var(--color-app-accent-strong);
+  --tw-ring-color: var(--color-app-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Update-banner enter animation. Guarded by `prefers-reduced-motion:
+ * no-preference` so the reduced-motion guarantee above remains intact. */
+@media (prefers-reduced-motion: no-preference) {
+  .pwa-update-banner {
+    animation: pwa-banner-in 200ms ease-out;
+  }
+  @keyframes pwa-banner-in {
+    from {
+      transform: translateY(12px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+/* Windows High Contrast / forced-colors mode. Each rounded card carries an
+ * explicit border so the surface delineation survives when user colour
+ * overrides flatten the design tokens. */
+@media (forced-colors: active) {
+  [role='note'],
+  .pwa-update-banner,
+  details {
+    border: 1px solid CanvasText;
+  }
+}

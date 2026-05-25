@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#A51931"/>
+  <g fill="#FFFFFF" font-family="'JetBrains Mono','SF Mono',ui-monospace,monospace" font-weight="700" text-anchor="middle">
+    <text x="256" y="232" font-size="176" letter-spacing="-8">13</text>
+    <text x="256" y="356" font-size="64" letter-spacing="4" opacity="0.92">ID</text>
+  </g>
+  <rect x="48" y="392" width="416" height="6" rx="3" fill="#FFFFFF" opacity="0.55"/>
+</svg>

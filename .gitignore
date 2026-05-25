@@ -1,0 +1,63 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+
+# Build output
+dist/
+dev-dist/
+
+# Vite
+.vite/
+vite.config.*.timestamp-*
+
+# TypeScript
+*.tsbuildinfo
+.tsbuildinfo
+
+# Test artefacts
+coverage/
+.vitest-cache/
+*.lcov
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Editor and IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+*~
+
+# Operating system
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Package archives
+*.tgz
+*.tar.gz
+
+# Local TLS material accidentally generated
+*.pem
+*.key
+*.crt
