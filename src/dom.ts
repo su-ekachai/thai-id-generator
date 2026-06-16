@@ -41,28 +41,6 @@ export function cell(text: string, className: string): HTMLTableCellElement {
 }
 
 /**
- * Creates an element with text content assigned via `textContent`.
- *
- * Shorthand for the common pattern of `el(tag, className)` followed by
- * `node.textContent = text`. Useful when a label or short string is the
- * only content of the element.
- *
- * @param tag - Tag name.
- * @param className - Space-separated class list.
- * @param text - Text content. Assigned via `textContent`, never via `innerHTML`.
- * @returns A detached element containing only the provided text.
- */
-export function text<K extends keyof HTMLElementTagNameMap>(
-  tag: K,
-  className: string,
-  text: string,
-): HTMLElementTagNameMap[K] {
-  const node = el(tag, className);
-  node.textContent = text;
-  return node;
-}
-
-/**
  * Removes every child of a container without using `innerHTML = ''`.
  *
  * The repeated `removeChild` loop is preferred over `innerHTML` assignment

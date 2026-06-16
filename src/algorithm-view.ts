@@ -27,7 +27,7 @@ export function renderAlgorithmTrace(container: HTMLElement, first12: string): v
   const trace = traceCheckDigit(first12);
   clearAlgorithmTrace(container);
 
-  const intro = el('p', 'text-sm text-muted mb-4');
+  const intro = el('p', 'text-sm leading-relaxed text-muted mb-4');
   intro.textContent = t('algo.intro');
   container.appendChild(intro);
 

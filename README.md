@@ -34,7 +34,6 @@
 | `vite-plugin-pwa` | `^1.3.0` | Service worker and web manifest via Workbox |
 | `Vitest` | `^4.1.7` | Test runner |
 | `happy-dom` | `^20.9.0` | Headless DOM environment for tests |
-| `tslog` | `^4.10.2` | Structured logger |
 
 ## Architecture
 
@@ -43,7 +42,7 @@ All source modules sit directly under `src/`. There are no sub-folders. Each mod
 - `src/generator.ts` — the 13-digit algorithm. No DOM, no `localStorage`.
 - `src/dom.ts` — safe DOM construction helpers used by every renderer.
 - `src/algorithm-view.ts`, `src/digits-view.ts`, `src/update-banner.ts` — DOM renderers; each exports a `render*` / `clear*` pair.
-- `src/i18n.ts`, `src/theme.ts`, `src/logger.ts`, `src/sw-register.ts` — browser-platform integrations (string table, theme persistence, structured logging, service-worker registration).
+- `src/i18n.ts`, `src/theme.ts`, `src/logger.ts`, `src/sw-register.ts` — browser-platform integrations (string table, theme persistence, console logging, service-worker registration).
 - `src/main.ts` — composition root. Wires the algorithm, the renderers, and the platform modules to the DOM declared in `index.html`.
 
 See `CLAUDE.md` for the full conventions enforced in code review.
@@ -59,14 +58,14 @@ thai-id-generator/
 │   ├── theme-init.js                Theme-flash prevention (loaded before bundle)
 │   └── .nojekyll                    Disable Jekyll on GitHub Pages
 ├── src/
-│   ├── generator.ts                 checkDigit, generateThaiId, validateThaiId, formatThaiId
+│   ├── generator.ts                 checkDigit, generateThaiId, formatThaiId, traceCheckDigit
 │   ├── algorithm-view.ts            Step-by-step checksum table
 │   ├── digits-view.ts               Colour-coded segment breakdown
 │   ├── update-banner.ts             "New version available" toast
 │   ├── dom.ts                       Shared safe DOM builders
 │   ├── i18n.ts                      Bilingual EN/TH string table
 │   ├── theme.ts                     Light / dark theme persistence
-│   ├── logger.ts                    tslog singleton
+│   ├── logger.ts                    Dependency-free console logging wrapper
 │   ├── sw-register.ts               Service worker registration wrapper
 │   ├── style.css                    Tailwind v4 @theme tokens + @utility classes
 │   └── main.ts                      Composition root + bootstrap

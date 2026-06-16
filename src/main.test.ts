@@ -142,6 +142,9 @@ describe('bootstrap', () => {
       value: { writeText },
     });
     bootstrap({ registerSW: false });
+    // The app defaults to Thai; pin English so the label assertions below are
+    // language-independent.
+    document.getElementById('lang-en')!.click();
     document.getElementById('btn-generate')!.click();
     document.getElementById('btn-copy')!.click();
     await vi.waitFor(() => expect(writeText).toHaveBeenCalled());
@@ -172,20 +175,20 @@ describe('bootstrap', () => {
     expect(document.getElementById('pwa-update-banner')).not.toBeNull();
   });
 
-  it('falls back to execCommand when the clipboard API rejects', async () => {
+  it('withholds the Copied label when the clipboard API rejects', async () => {
     const writeText = vi.fn().mockRejectedValue(new Error('blocked'));
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
       value: { writeText },
     });
-    const execCommand = vi.fn().mockReturnValue(true);
-    Object.defineProperty(document, 'execCommand', {
-      configurable: true,
-      value: execCommand,
-    });
     bootstrap({ registerSW: false });
+    // The app defaults to Thai; pin English so the unchanged-label assertion
+    // is language-independent.
+    document.getElementById('lang-en')!.click();
     document.getElementById('btn-generate')!.click();
     document.getElementById('btn-copy')!.click();
-    await vi.waitFor(() => expect(execCommand).toHaveBeenCalledWith('copy'));
+    await vi.waitFor(() => expect(writeText).toHaveBeenCalled());
+    // A failed copy must not report success.
+    expect(document.getElementById('btn-copy-label')!.textContent).toBe('Copy');
   });
 });

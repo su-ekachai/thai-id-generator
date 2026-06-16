@@ -1,17 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { applyTranslations, getLang, initLang, setLang, t } from './i18n';
 
-function stubLanguage(value: string): void {
-  Object.defineProperty(navigator, 'language', {
-    configurable: true,
-    get: () => value,
-  });
-}
-
 beforeEach(() => {
-  stubLanguage('en-US');
-  // initLang reads localStorage first; tests/setup.ts clears storage already.
-  // initLang() resets the module-level language back to a clean default.
+  // `tests/setup.ts` clears storage between tests; `initLang()` resets the
+  // module-level language to its clean default before each case.
   initLang();
 });
 
@@ -57,20 +49,20 @@ describe('initLang', () => {
     expect(document.documentElement.lang).toBe('th');
   });
 
-  it('falls back to Thai when navigator.language starts with "th" and no storage entry exists', () => {
-    stubLanguage('th-TH');
+  it('respects a persisted English selection over the Thai default', () => {
+    localStorage.setItem('thai-id-lang', 'en');
+    expect(initLang()).toBe('en');
+    expect(document.documentElement.lang).toBe('en');
+  });
+
+  it('defaults to Thai when no storage entry exists', () => {
     expect(initLang()).toBe('th');
+    expect(document.documentElement.lang).toBe('th');
   });
 
-  it('falls back to English by default', () => {
-    stubLanguage('en-US');
-    expect(initLang()).toBe('en');
-  });
-
-  it('ignores invalid stored values', () => {
+  it('ignores invalid stored values and falls back to Thai', () => {
     localStorage.setItem('thai-id-lang', 'fr');
-    stubLanguage('en-US');
-    expect(initLang()).toBe('en');
+    expect(initLang()).toBe('th');
   });
 });
 
