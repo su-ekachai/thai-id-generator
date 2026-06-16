@@ -1,11 +1,11 @@
-import { describe, expect, it, vi } from 'vitest';
-import {
-  checkDigit,
-  formatThaiId,
-  generateThaiId,
-  traceCheckDigit,
-  validateThaiId,
-} from './generator';
+import { describe, expect, it } from 'vitest';
+import { checkDigit, formatThaiId, generateThaiId, traceCheckDigit } from './generator';
+
+/** Asserts a raw 13-digit ID's check digit matches its first 12 digits. */
+function expectConsistent(id: string): void {
+  expect(id).toHaveLength(13);
+  expect(checkDigit(id.slice(0, 12))).toBe(Number(id[12]));
+}
 
 describe('checkDigit', () => {
   it('matches the manually-computed value for a known fixture', () => {
@@ -44,47 +44,8 @@ describe('generateThaiId', () => {
 
   it('produces an ID whose check digit is internally consistent', () => {
     for (let i = 0; i < 1000; i++) {
-      const id = generateThaiId();
-      expect(validateThaiId(id)).toBe(true);
+      expectConsistent(generateThaiId());
     }
-  });
-
-  it('uses the provided random source deterministically', () => {
-    const seq = [0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95, 0.5, 0.5];
-    let i = 0;
-    const spy = vi.spyOn(Math, 'random').mockImplementation(() => seq[i++ % seq.length] ?? 0);
-    const id = generateThaiId();
-    spy.mockRestore();
-    expect(id).toHaveLength(13);
-    expect(validateThaiId(id)).toBe(true);
-  });
-});
-
-describe('validateThaiId', () => {
-  it('accepts a known-good ID', () => {
-    // 1012345678907 → checkDigit("101234567890") = 7
-    expect(validateThaiId('1012345678907')).toBe(true);
-  });
-
-  it('rejects wrong length', () => {
-    expect(validateThaiId('12345')).toBe(false);
-    expect(validateThaiId('12345678901234')).toBe(false);
-  });
-
-  it('rejects all-zero IDs (check digit mismatch)', () => {
-    expect(validateThaiId('0000000000000')).toBe(false);
-  });
-
-  it('rejects an ID with a tampered check digit', () => {
-    expect(validateThaiId('1012345678900')).toBe(false);
-  });
-
-  it('strips non-digit characters before validating', () => {
-    expect(validateThaiId('1-0123-45678-90-7')).toBe(true);
-  });
-
-  it('rejects when stripping leaves the wrong length', () => {
-    expect(validateThaiId('1-0123-45678-90')).toBe(false);
   });
 });
 

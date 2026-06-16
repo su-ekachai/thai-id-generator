@@ -21,6 +21,20 @@ const ID_LENGTH = 13;
 const WEIGHT_BASE = 14;
 
 /**
+ * Asserts that `first12` is exactly 12 digit characters. Shared by `checkDigit`
+ * and `traceCheckDigit` so the input contract is defined once and cannot drift
+ * between the two entry points.
+ *
+ * @param first12 - The candidate input.
+ * @throws {Error} When `first12` is not exactly 12 digits.
+ */
+function requireTwelveDigits(first12: string): void {
+  if (first12.length !== 12 || !/^\d{12}$/.test(first12)) {
+    throw new Error('requires exactly 12 digits');
+  }
+}
+
+/**
  * Computes the official check digit for the first 12 digits of a Thai
  * national ID.
  *
@@ -29,9 +43,7 @@ const WEIGHT_BASE = 14;
  * @throws {Error} When `first12` is not exactly 12 digits.
  */
 export function checkDigit(first12: string): number {
-  if (first12.length !== 12 || !/^\d{12}$/.test(first12)) {
-    throw new Error('checkDigit requires exactly 12 digits');
-  }
+  requireTwelveDigits(first12);
   let sum = 0;
   for (let i = 0; i < 12; i++) {
     const d = Number(first12[i]);
@@ -91,24 +103,6 @@ export function generateThaiId(): string {
 }
 
 /**
- * Verifies that a 13-digit string is internally consistent — i.e. its 13th
- * digit equals `checkDigit` of its first 12 digits.
- *
- * Non-digit characters are stripped before validation, so common display
- * formats such as `1-2345-67890-12-3` are accepted.
- *
- * @param id - The ID to validate. Separators are tolerated.
- * @returns `true` when the stripped string is 13 digits and the check digit
- *   matches; `false` otherwise.
- */
-export function validateThaiId(id: string): boolean {
-  const raw = id.replace(/\D/g, '');
-  if (raw.length !== ID_LENGTH) return false;
-  const expected = checkDigit(raw.slice(0, 12));
-  return expected === Number(raw[12]);
-}
-
-/**
  * Formats a 13-digit ID into the conventional `X-XXXX-XXXXX-XX-X` display
  * grouping used on physical Thai national ID cards.
  *
@@ -162,9 +156,7 @@ export interface AlgorithmTrace {
  * @throws {Error} When `first12` is not exactly 12 digits.
  */
 export function traceCheckDigit(first12: string): AlgorithmTrace {
-  if (first12.length !== 12 || !/^\d{12}$/.test(first12)) {
-    throw new Error('traceCheckDigit requires exactly 12 digits');
-  }
+  requireTwelveDigits(first12);
   const digits: number[] = [];
   const weights: number[] = [];
   const products: number[] = [];

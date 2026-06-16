@@ -82,7 +82,7 @@ export function renderDigitsBreakdown(container: HTMLElement, rawId: string): vo
     throw new Error('renderDigitsBreakdown requires a 13-digit string');
   }
 
-  const intro = el('p', 'text-sm text-muted mb-5');
+  const intro = el('p', 'text-sm leading-relaxed text-muted mb-5');
   intro.textContent = t('digits.intro');
   container.appendChild(intro);
 
@@ -156,7 +156,7 @@ function buildReferenceTable(): HTMLElement {
     const tr = el('tr', 'border-t border-app-border align-top');
     tr.appendChild(cell(seg.range, 'py-2 px-3 font-mono tabular-nums text-muted whitespace-nowrap'));
     tr.appendChild(cell(t(seg.labelKey), 'py-2 px-3 font-semibold whitespace-nowrap'));
-    tr.appendChild(cell(t(seg.meaningKey), 'py-2 px-3 text-muted'));
+    tr.appendChild(cell(t(seg.meaningKey), 'py-2 px-3 leading-relaxed text-muted'));
     tbody.appendChild(tr);
   }
   table.appendChild(tbody);
@@ -182,7 +182,7 @@ function buildTypeCodesTable(): HTMLElement {
       'flex h-7 w-7 shrink-0 items-center justify-center rounded-md segment-type font-mono tabular-nums text-sm font-bold',
     );
     dt.textContent = code;
-    const dd = el('dd', 'text-sm text-app leading-snug');
+    const dd = el('dd', 'text-sm text-app leading-relaxed');
     dd.textContent = t(`digits.type.${code}`);
     row.append(dt, dd);
     list.appendChild(row);

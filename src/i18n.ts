@@ -3,9 +3,9 @@
  *
  * Keys follow the dotted convention `group.subgroup.value` (for example
  * `digits.label.type`, `update.reload`). Every UI string used at runtime
- * passes through `t()`; hard-coded English in markup is reserved only for the
- * default attribute value visible to readers who fetch the page before the
- * bundle finishes loading.
+ * passes through `t()`; the hard-coded Thai in markup is reserved only for the
+ * default attribute value rendered before the bundle hydrates, so the first
+ * paint already reads in Thai for the target audience.
  *
  * @packageDocumentation
  */
@@ -148,18 +148,18 @@ const STRINGS: Record<Lang, StringTable> = {
 /**
  * Resolves the initial language using the priority order:
  *
- *  1. Value stored under `localStorage[STORAGE_KEY]` when it is `'en'` or `'th'`.
- *  2. `navigator.language` when it starts with `th`.
- *  3. Default `en`.
+ *  1. The value stored under `localStorage[STORAGE_KEY]` when it is `'en'` or `'th'`.
+ *  2. Thai by default. The application targets a Thai audience, so a first
+ *     visit loads Thai; English is reachable through the in-header language
+ *     toggle and persists once chosen.
  */
 function detectInitialLang(): Lang {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored === "en" || stored === "th") return stored;
-  if (navigator.language?.toLowerCase().startsWith("th")) return "th";
-  return "en";
+  return "th";
 }
 
-let currentLang: Lang = "en";
+let currentLang: Lang = "th";
 
 /**
  * Returns the currently-selected language code.
@@ -200,7 +200,7 @@ export function setLang(lang: Lang): void {
 
 /**
  * Initialises the language module on page load. Reads the persisted choice
- * (or detects from the browser locale), updates `<html lang>`, and applies
+ * (or falls back to the Thai default), updates `<html lang>`, and applies
  * all translations to the existing DOM.
  *
  * @returns The resolved language code, useful for setting `aria-pressed` on

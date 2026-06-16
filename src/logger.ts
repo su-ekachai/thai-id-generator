@@ -1,29 +1,45 @@
-import { Logger, type ILogObj } from 'tslog';
-
-const isDev: boolean = Boolean((import.meta as { env?: { DEV?: boolean } }).env?.DEV);
-
 /**
- * Application-wide structured logger.
+ * Application-wide logger.
  *
- * The singleton is configured for two profiles. In development (`import.meta.env.DEV === true`)
- * the minimum log level is `silly` (`0`) and source positions are printed so calls
- * surface line numbers next to messages. In production the minimum level is `info` (`3`),
- * which keeps `info`, `warn`, `error`, and `fatal` visible while hiding `silly`, `trace`,
- * and `debug` to reduce console noise.
+ * A dependency-free wrapper over the platform `console`. It exists so call sites
+ * stay decoupled from the console and so every line carries a consistent,
+ * greppable shape: each is tagged `[thai-id] <LEVEL>` and structured context is
+ * forwarded to the console untouched, so devtools renders it as an inspectable
+ * value rather than a flattened string.
  *
- * The instance is intentionally a module singleton so that unit tests, the bootstrap
- * entry, and the service-worker registration share the same configured logger. Tests
- * mock the singleton at module-import time when behaviour assertions are required.
+ * Only the levels the application emits are exposed — `info`, `warn`, and
+ * `error`. All three are actionable and always reach the console.
  *
  * @example
  *   import { log } from './logger';
  *   log.info('bootstrap complete', { lang: 'en' });
- *   log.warn('clipboard rejected; falling back', err);
- *   log.error('SW registration failed', err);
+ *   log.warn('clipboard rejected', err);
+ *   log.error('service worker registration failed', err);
  */
-export const log: Logger<ILogObj> = new Logger<ILogObj>({
-  name: 'thai-id',
-  type: 'pretty',
-  minLevel: isDev ? 0 : 3,
-  hideLogPositionForProduction: !isDev,
-});
+
+const NAME = 'thai-id';
+
+type LogFn = (message: string, ...context: unknown[]) => void;
+
+/** The logging surface consumed across the application. */
+export interface Log {
+  info: LogFn;
+  warn: LogFn;
+  error: LogFn;
+}
+
+/**
+ * Builds a level method that prefixes the `thai-id` tag and forwards the message
+ * and any structured context to the matching `console` method. The console
+ * member is read at call time so output respects spies and console
+ * reconfiguration rather than capturing a stale reference.
+ */
+function at(level: string, method: 'info' | 'warn' | 'error'): LogFn {
+  return (message, ...context) => console[method](`[${NAME}] ${level}`, message, ...context);
+}
+
+export const log: Log = {
+  info: at('INFO', 'info'),
+  warn: at('WARN', 'warn'),
+  error: at('ERROR', 'error'),
+};

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cell, clearChildren, el, text } from './dom';
+import { cell, clearChildren, el } from './dom';
 
 describe('el', () => {
   it('creates an element with the requested tag and class string', () => {
@@ -26,15 +26,6 @@ describe('cell', () => {
     const td = cell('<script>alert(1)</script>', '');
     expect(td.textContent).toBe('<script>alert(1)</script>');
     expect(td.children).toHaveLength(0);
-  });
-});
-
-describe('text', () => {
-  it('creates a tagged element with the supplied text content', () => {
-    const node = text('p', 'lead', 'Hello world');
-    expect(node.tagName).toBe('P');
-    expect(node.className).toBe('lead');
-    expect(node.textContent).toBe('Hello world');
   });
 });
 

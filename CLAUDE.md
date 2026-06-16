@@ -26,7 +26,6 @@ The application:
 | `vite-plugin-pwa` | `^1.3.0` | Service worker (`generateSW`) and web manifest |
 | `Vitest` | `^4.1.7` | Test runner |
 | `happy-dom` | `^20.9.0` | DOM environment for tests |
-| `tslog` | `^4.10.2` | Singleton structured logger |
 
 ## Architecture
 
@@ -37,7 +36,7 @@ All source modules live directly under `src/`. There are no sub-folders. Each mo
 | `src/generator.ts` | Pure algorithm. Must not import DOM, `window`, `document`, `navigator`, or `localStorage`. |
 | `src/dom.ts` | Safe DOM construction helpers (`el`, `cell`, `text`, `clearChildren`). |
 | `src/algorithm-view.ts`, `src/digits-view.ts`, `src/update-banner.ts` | DOM renderers. Build output through `src/dom.ts`. Each exports a `render*` / `clear*` pair. |
-| `src/i18n.ts`, `src/theme.ts`, `src/logger.ts`, `src/sw-register.ts` | Browser-platform integrations. Each wraps one platform concern (string table, theme persistence, structured logging, service-worker registration). |
+| `src/i18n.ts`, `src/theme.ts`, `src/logger.ts`, `src/sw-register.ts` | Browser-platform integrations. Each wraps one platform concern (string table, theme persistence, console logging, service-worker registration). |
 | `src/main.ts` | Composition root. Wires the renderers, the algorithm, and the platform modules to the DOM declared in `index.html`. The only module allowed to run code at import time. |
 
 ## Coding conventions
@@ -138,11 +137,11 @@ This eliminates HTML-string injection as a class of bug.
 import { log } from './logger';
 
 log.info('bootstrap complete', { lang });
-log.warn('clipboard rejected; falling back', err);
+log.warn('clipboard rejected', err);
 log.error('SW registration failed', err);
 ```
 
-The logger reads `import.meta.env.DEV` to switch between verbose (development) and `info`-and-above (production). No further configuration is needed at call sites.
+`src/logger.ts` is a dependency-free wrapper over the platform `console`. It exposes the three levels the application emits — `info`, `warn`, and `error` — each tagged `[thai-id] <LEVEL>` with structured context forwarded to the console untouched. Call sites use the `log` singleton, never `console.*` directly.
 
 ### `render*` / `clear*` symmetry
 
@@ -190,9 +189,9 @@ When adding a new colour-coded surface, define a new pair of tokens and `@utilit
 
 ## Internationalisation
 
-- Bilingual `en` / `th`. Default `en`. First-visit defaults to `th` only when `navigator.language` starts with `th`.
+- Bilingual `en` / `th`. Default `th` for the Thai target audience. A stored choice in `thai-id-lang` wins; English is reachable through the in-header language toggle and persists once chosen.
 - Persistence key: `thai-id-lang`.
-- Every visible string passes through `t('group.subgroup.value')`. Hard-coded text is allowed only as the default attribute value rendered before the bundle hydrates.
+- Every visible string passes through `t('group.subgroup.value')`. Hard-coded Thai is allowed only as the default attribute value rendered before the bundle hydrates, so the first paint reads in Thai.
 - Add new strings to both tables in `src/i18n.ts`. Translation gaps are visible because `t` returns the key when missing.
 
 ## PWA and service worker

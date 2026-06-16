@@ -79,26 +79,17 @@ export function bootstrap(options: BootstrapOptions = {}): void {
 
   async function onCopy(): Promise<void> {
     if (!currentRawId) return;
-    // The clipboard receives the raw 13-digit number so downstream form
-    // fields and validators accept it without further parsing.
-    const text = currentRawId;
+    // The clipboard receives the raw 13-digit number so downstream form fields
+    // and validators accept it without further parsing. `navigator.clipboard` is
+    // Baseline Widely Available and the app ships only over HTTPS, so no
+    // deprecated `execCommand` fallback is carried. A rejection is surfaced for
+    // observability and the success label is withheld so the UI never reports a
+    // copy that did not happen.
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(currentRawId);
     } catch (err) {
-      log.warn('navigator.clipboard.writeText rejected; falling back to execCommand', err);
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.setAttribute('readonly', '');
-      ta.style.position = 'absolute';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        document.execCommand('copy');
-      } catch (execErr) {
-        log.error('execCommand("copy") fallback failed', execErr);
-      }
-      document.body.removeChild(ta);
+      log.warn('navigator.clipboard.writeText rejected', err);
+      return;
     }
     btnCopyLabel.textContent = t('id.copied');
     if (copyResetTimer !== undefined) window.clearTimeout(copyResetTimer);
